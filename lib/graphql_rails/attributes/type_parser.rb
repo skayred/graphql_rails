@@ -27,7 +27,10 @@ module GraphqlRails
 
         'float' => GraphQL::FLOAT_TYPE,
         'double' => GraphQL::FLOAT_TYPE,
-        'decimal' => GraphQL::FLOAT_TYPE
+        'decimal' => GraphQL::FLOAT_TYPE,
+
+        'datetime' => GraphQL::Types::ISO8601DateTime,
+        'json' => GraphQL::Types::JSON
       }.freeze
 
       RAW_GRAPHQL_TYPES = [
