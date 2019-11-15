@@ -39,7 +39,7 @@ module GraphqlRails
           graphql_name(type_name)
 
           routes.select { |route| route.show_in_group?(group_name) }.each do |route|
-            field(*route.field_args)
+            field(*route.field_args(group: group_name))
           end
 
           def self.inspect

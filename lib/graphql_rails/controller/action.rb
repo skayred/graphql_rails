@@ -13,8 +13,8 @@ module GraphqlRails
         @route = route
       end
 
-      def return_type
-        action_config.return_type
+      def return_type(group: nil)
+        action_config.return_type(group: group)
       end
 
       def arguments

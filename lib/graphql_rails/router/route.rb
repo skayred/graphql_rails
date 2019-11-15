@@ -33,7 +33,7 @@ module GraphqlRails
         groups.include?(group_name&.to_sym)
       end
 
-      def field_args
+      def field_args(group: nil)
         options = {}
 
         if function

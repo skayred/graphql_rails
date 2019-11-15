@@ -158,6 +158,67 @@ module GraphqlRails
       end
     end
 
+    describe '#group' do
+      subject(:group) { config.group(:mobile) }
+
+      context 'when config block is not given' do
+        it 'raises error' do
+          expect { group }.to raise_error('GraphQL group with name :mobile is not defined for DummyModel')
+        end
+      end
+
+      context 'when config block is given' do
+        subject(:group) do
+          config.group(:mobile) do |c|
+            c.attribute :name
+          end
+        end
+
+        context 'when one group is given' do
+          it 'returns group instance' do
+            require 'pry'; binding.pry
+            expect(group).to be_a(Model::Group)
+          end
+
+          it 'has got specified attributes' do
+            expect(group.attributes.values.map(&:property)).to eq(['name'])
+          end
+        end
+
+        context 'when more than one group name is given' do
+          subject(:group) do
+            config.group(:web, :mobile) do |c|
+              c.attribute :name
+            end
+          end
+
+          it 'returns group instances' do
+            expect(group).to all(be_a(Model::Group))
+          end
+
+          context 'when same group is defined more than once' do
+            subject!(:group) do
+              config.group(:web, :mobile) do |c|
+                c.attribute :last_name
+              end
+
+              config.group(:web) do |c|
+                c.attribute :first_name
+              end
+            end
+
+            it 'merges attributes' do
+              expect(group.attributes.values.map(&:property)).to eq(%w[last_name first_name])
+            end
+
+            it 'does not modifies another groups' do
+              expect(config.group(:mobile).attributes.values.map(&:property)).to eq(['last_name'])
+            end
+          end
+        end
+      end
+    end
+
     describe '#input' do
       subject(:input) { config.input(:new_input) }
 

@@ -9,6 +9,10 @@ module GraphqlRails
         @attributes ||= {}
       end
 
+      def groups
+        @groups ||= {}
+      end
+
       def name(type_name = nil)
         @name = type_name if type_name
         @name || default_name

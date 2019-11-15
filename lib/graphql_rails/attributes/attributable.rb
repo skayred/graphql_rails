@@ -36,6 +36,12 @@ module GraphqlRails
         !required?
       end
 
+      def show_in_group?(group_name)
+        return true if groups.nil? || groups.empty?
+
+        groups.include?(group_name&.to_sym)
+      end
+
       protected
 
       def options

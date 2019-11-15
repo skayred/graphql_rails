@@ -11,16 +11,18 @@ module GraphqlRails
 
       PAGINATION_KEYS = %i[before after first last].freeze
 
-      def initialize(name:, description: nil, attributes:)
+      def initialize(name:, description: nil, attributes:, group: nil)
         @name = name
         @attributes = attributes
         @description = description
+        @group = group
       end
 
       def call
         type_name = name
         type_description = description
-        type_attributes = attributes
+        require 'pry'; binding.pry if type_name == 'AbsenceRequest'
+        type_attributes = attributes.select { |_, it| it.show_in_group?(group) }
 
         Class.new(GraphQL::Schema::Object) do
           graphql_name(type_name)
@@ -47,7 +49,7 @@ module GraphqlRails
 
       private
 
-      attr_reader :attributes, :name, :description
+      attr_reader :attributes, :name, :description, :group
     end
   end
 end

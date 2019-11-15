@@ -82,8 +82,10 @@ module GraphqlRails
         returns(list_name)
       end
 
-      def return_type
-        @return_type ||= build_return_type
+      def return_type(group: nil)
+        @return_type ||= {}
+
+        @return_type[group&.to_sym] ||= build_return_type(group: group)
       end
 
       def type_parser
@@ -94,13 +96,13 @@ module GraphqlRails
 
       attr_reader :custom_return_type
 
-      def build_return_type
+      def build_return_type(group: nil)
         return raise_deprecation_error if custom_return_type.nil?
 
         if paginated?
           type_parser.graphql_model ? type_parser.graphql_model.graphql.connection_type : nil
         else
-          type_parser.graphql_type
+          type_parser.graphql_type(group: group)
         end
       end
 

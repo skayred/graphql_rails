@@ -22,6 +22,14 @@ module GraphqlRails
         @attributes ||= {}
       end
 
+      def group(*new_groups)
+        return @groups if new_groups.empty?
+
+        @groups ||= []
+        @groups = (new_groups + @groups).map(&:to_sym).uniq
+        self
+      end
+
       def type(new_type = nil)
         return @initial_type if new_type.nil?
 
@@ -68,7 +76,7 @@ module GraphqlRails
 
       protected
 
-      attr_reader :initial_type, :initial_name
+      attr_reader :initial_type, :initial_name, :groups
     end
   end
 end
