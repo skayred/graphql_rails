@@ -17,9 +17,10 @@ module GraphqlRails
 
       delegate :list?, :required_inner_type?, :required_list?, :required?, to: :type_name_info
 
-      def initialize(unparsed_type, paginated: false)
+      def initialize(unparsed_type, paginated: false, group: nil)
         @unparsed_type = unparsed_type
         @paginated = paginated
+        @group = group
       end
 
       def paginated?
@@ -29,7 +30,9 @@ module GraphqlRails
       def graphql_type
         return unparsed_type if raw_graphql_type?
 
-        if list?
+        if paginated?
+          graphql_model.graphql.connection_type
+        elsif list?
           parsed_list_type
         else
           parsed_inner_type
@@ -74,7 +77,7 @@ module GraphqlRails
 
       private
 
-      attr_reader :unparsed_type
+      attr_reader :unparsed_type, :group
 
       def parsed_list_type
         list_type = parsed_inner_type.to_list_type
@@ -114,7 +117,7 @@ module GraphqlRails
         type_class = graphql_model
         return unless type_class
 
-        type_class.graphql.graphql_type
+        type_class.graphql.graphql_type(group: group)
       end
     end
   end

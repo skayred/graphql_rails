@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'graphql_rails/router/build_root_type'
+
 module GraphqlRails
   class Router
     # builds GraphQL::Schema based on previously defined grahiti data
@@ -16,8 +18,8 @@ module GraphqlRails
       end
 
       def call
-        query_type = build_type('Query', queries)
-        mutation_type = build_type('Mutation', mutations)
+        query_type = build_query_root_type
+        mutation_type = build_mutation_root_type
         raw = raw_actions
 
         Class.new(GraphQL::Schema) do
@@ -33,19 +35,12 @@ module GraphqlRails
 
       attr_reader :group
 
-      def build_type(type_name, routes)
-        group_name = group
-        Class.new(GraphQL::Schema::Object) do
-          graphql_name(type_name)
+      def build_query_root_type
+        BuildRootType.call(name: 'Query', routes: queries, group: group)
+      end
 
-          routes.select { |route| route.show_in_group?(group_name) }.each do |route|
-            field(*route.field_args)
-          end
-
-          def self.inspect
-            "#{GraphQL::Schema::Object}(#{graphql_name})"
-          end
-        end
+      def build_mutation_root_type
+        BuildRootType.call(name: 'Mutation', routes: mutations, group: group)
       end
     end
   end

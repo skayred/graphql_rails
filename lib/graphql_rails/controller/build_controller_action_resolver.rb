@@ -10,8 +10,9 @@ module GraphqlRails
     class BuildControllerActionResolver
       include ::GraphqlRails::Service
 
-      def initialize(route:)
+      def initialize(route:, group: group)
         @route = route
+        @group = group
       end
 
       def call # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
@@ -35,10 +36,10 @@ module GraphqlRails
 
       private
 
-      attr_reader :route
+      attr_reader :route, :group
 
       def build_action
-        Action.new(route)
+        Action.new(route, group: group)
       end
     end
   end

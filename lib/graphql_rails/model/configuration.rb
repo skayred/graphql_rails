@@ -4,6 +4,7 @@ require 'graphql_rails/attributes'
 require 'graphql_rails/model/build_graphql_type'
 require 'graphql_rails/model/build_enum_type'
 require 'graphql_rails/model/input'
+require 'graphql_rails/model/group'
 require 'graphql_rails/model/configurable'
 require 'graphql_rails/model/build_connection_type'
 
@@ -53,9 +54,35 @@ module GraphqlRails
         end
       end
 
-      def graphql_type
-        @graphql_type ||= BuildGraphqlType.call(
-          name: name, description: description, attributes: attributes
+      def group(*group_name, &block)
+        group_name = group_name.flatten
+
+        graphql_groups = group_name.map do |name|
+          build_group(name.to_s, &block) if block_given?
+          fetch_group(name)
+        end
+
+        graphql_groups.size == 1 ? graphql_groups[0] : graphql_groups
+      end
+
+      def build_group(name)
+        groups[name] ||= Model::Group.new(name)
+        yield(groups[name])
+      end
+
+      def fetch_group(name)
+        group_name = name.to_s
+        groups.fetch(group_name) { group_error(name) }
+      end
+
+      def group_error(name)
+        raise("GraphQL group with name #{Array(name).map(&:inspect).join(', ')} is not defined for #{model_class.name}")
+      end
+
+      def graphql_type(group: nil)
+        @graphql_type ||= {}
+        @graphql_type[group&.to_sym] ||= BuildGraphqlType.call(
+          name: name, description: description, attributes: attributes, group: group
         )
       end
 

@@ -1,12 +1,15 @@
 # frozen_string_literal: true
 
 require_relative '../controller/build_controller_action_resolver'
+require 'graphql_rails/concerns/groupable'
 
 module GraphqlRails
   class Router
     # Generic class for any type graphql action. Should not be used directly
     class Route
-      attr_reader :name, :module_name, :on, :relative_path
+      include Groupable
+
+      attr_reader :name, :module_name, :on, :relative_path, :function
 
       def initialize(name, to: '', on:, groups: nil, **options)
         @name = name.to_s.camelize(:lower)
@@ -27,12 +30,6 @@ module GraphqlRails
         on == :collection
       end
 
-      def show_in_group?(group_name)
-        return true if groups.nil? || groups.empty?
-
-        groups.include?(group_name&.to_sym)
-      end
-
       def field_args
         options = {}
 
@@ -47,11 +44,7 @@ module GraphqlRails
 
       private
 
-      attr_reader :function, :groups
-
-      def resolver
-        @resolver ||= Controller::BuildControllerActionResolver.call(route: self)
-      end
+      attr_reader :groups
     end
   end
 end

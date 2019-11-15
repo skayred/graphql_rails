@@ -9,12 +9,13 @@ module GraphqlRails
   class Controller
     # analyzes route and extracts controller action related data
     class Action
-      def initialize(route)
+      def initialize(route, group: nil)
         @route = route
+        @group = group
       end
 
-      def return_type
-        action_config.return_type
+      def return_type(group: nil)
+        action_config.return_type(group: group)
       end
 
       def arguments
@@ -39,7 +40,7 @@ module GraphqlRails
 
       private
 
-      attr_reader :route
+      attr_reader :route, :group
 
       delegate :type_parser, to: :action_config
 
@@ -61,6 +62,10 @@ module GraphqlRails
 
       def namespaced_model_name
         namespaced_controller_name.singularize.classify
+      end
+
+      def resolver
+        @resolver ||= Controller::BuildControllerActionResolver.call(action: self)
       end
     end
   end
