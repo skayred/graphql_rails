@@ -58,11 +58,7 @@ module GraphqlRails
           field_name,
           type_parser.type_arg,
           *description,
-          {
-            method: property.to_sym,
-            null: optional?,
-            camelize: camelize?
-          }
+          field_args_options
         ]
       end
 
@@ -85,6 +81,21 @@ module GraphqlRails
 
       def camelize?
         options[:input_format] != :original && options[:attribute_name_format] != :original
+      end
+
+      def field_args_options
+        {
+          method: property.to_sym,
+          null: optional?,
+          camelize: camelize?,
+          **field_pagination_options
+        }
+      end
+
+      def field_pagination_options
+        return {} unless type_parser.paginated?
+
+        pagination_options
       end
     end
   end

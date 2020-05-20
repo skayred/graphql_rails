@@ -51,13 +51,15 @@ module GraphqlRails
 
       describe '#field_args' do
         subject(:field_args) { attribute.field_args }
+        let(:field_arg_options) { field_args.last }
+        let(:field_arg_type) { field_args[1] }
 
         context 'when type is not set' do
           let(:type) { nil }
 
           context 'when attribute name ends without bang mark (!)' do
             it 'builds optional field' do
-              expect(field_args.last).to include(null: true)
+              expect(field_arg_options).to include(null: true)
             end
           end
 
@@ -65,7 +67,7 @@ module GraphqlRails
             let(:name) { :full_name! }
 
             it 'builds required field' do
-              expect(field_args.last).to include(null: false)
+              expect(field_arg_options).to include(null: false)
             end
           end
 
@@ -73,7 +75,7 @@ module GraphqlRails
             let(:name) { :admin? }
 
             it 'returns boolean type' do
-              expect(field_args[1]).to eq GraphQL::BOOLEAN_TYPE
+              expect(field_arg_type).to eq GraphQL::BOOLEAN_TYPE
             end
           end
 
@@ -81,28 +83,28 @@ module GraphqlRails
             let(:name) { :id }
 
             it 'returns id type' do
-              expect(field_args[1]).to eq GraphQL::ID_TYPE
+              expect(field_arg_type).to eq GraphQL::ID_TYPE
             end
           end
         end
 
         context 'when attribute is required' do
           it 'builds required field' do
-            expect(field_args.last).to include(null: false)
+            expect(field_arg_options).to include(null: false)
           end
         end
 
-        context 'when atribute name format options are passed' do
+        context 'when attribute name format options are passed' do
           let(:options) { { attribute_name_format: :original } }
 
           it 'forwards disables camelize' do
-            expect(field_args.last).to include(camelize: false)
+            expect(field_arg_options).to include(camelize: false)
           end
         end
 
-        context 'when atribute name format options are not passed' do
+        context 'when attribute name format options are not passed' do
           it 'ignores keeps camelize active' do
-            expect(field_args.last).to include(camelize: true)
+            expect(field_arg_options).to include(camelize: true)
           end
         end
 
@@ -110,22 +112,22 @@ module GraphqlRails
           let(:type) { 'String' }
 
           it 'builds optional field' do
-            expect(field_args.last).to include(null: true)
+            expect(field_arg_options).to include(null: true)
           end
         end
 
-        context 'when attribute is array' do
+        context 'when attribute type is array' do
           let(:type) { '[Int!]!' }
 
           context 'when array is required' do
             let(:type) { '[Int]!' }
 
             it 'builds required outher field' do
-              expect(field_args.last).to include(null: false)
+              expect(field_arg_options).to include(null: false)
             end
 
             it 'builds optional list type field' do
-              expect(field_args[1]).to eq([GraphQL::INT_TYPE, null: true])
+              expect(field_arg_type).to eq([GraphQL::INT_TYPE, null: true])
             end
           end
 
@@ -133,21 +135,21 @@ module GraphqlRails
             let(:type) { '[Int!]' }
 
             it 'builds optional outher field' do
-              expect(field_args.last).to include(null: true)
+              expect(field_arg_options).to include(null: true)
             end
 
             it 'builds required inner array type' do
-              expect(field_args[1]).to eq([GraphQL::INT_TYPE])
+              expect(field_arg_type).to eq([GraphQL::INT_TYPE])
             end
           end
 
           context 'when array and its inner type is required' do
             it 'builds required outher field' do
-              expect(field_args.last).to include(null: false)
+              expect(field_arg_options).to include(null: false)
             end
 
             it 'builds required inner array type' do
-              expect(field_args[1]).to eq([GraphQL::INT_TYPE])
+              expect(field_arg_type).to eq([GraphQL::INT_TYPE])
             end
           end
 
@@ -155,11 +157,41 @@ module GraphqlRails
             let(:type) { '[Int]' }
 
             it 'builds optional outher field' do
-              expect(field_args.last).to include(null: true)
+              expect(field_arg_options).to include(null: true)
             end
 
             it 'builds optional list type field' do
-              expect(field_args[1]).to eq([GraphQL::INT_TYPE, null: true])
+              expect(field_arg_type).to eq([GraphQL::INT_TYPE, null: true])
+            end
+          end
+        end
+
+        context 'when attribute is paginated' do
+          let(:type) do
+            Class.new do
+              include GraphqlRails::Model
+
+              graphql.name 'TestType'
+            end
+          end
+
+          context 'when attribute is paginated without options' do
+            before do
+              attribute.paginated
+            end
+
+            it 'includes pagination options' do
+              expect(field_arg_options).not_to include(:max_page_size)
+            end
+          end
+
+          context 'when attribute is paginated with options' do
+            before do
+              attribute.paginated(max_page_size: 5)
+            end
+
+            it 'includes pagination options' do
+              expect(field_arg_options).to include(:max_page_size)
             end
           end
         end
