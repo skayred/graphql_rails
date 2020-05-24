@@ -24,7 +24,12 @@ module GraphqlRails
           result = self.class.controller.new(request).call(self.class.controller_action_name)
 
           if self.class.name == 'Paginatable'
-            return result.paginate(page: inputs[:page])
+            column = inputs[:column] || 'id'
+            direction = 'asc'
+            if params[:direction] < 0
+              direction = 'desc'
+            end
+            return result.where("name LIKE ?", "%#{sanitize_sql_like(inputs[:filter])}%").order("#{column} #{direction}").paginate(page: inputs[:page])
           end
 
           result
