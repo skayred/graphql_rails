@@ -32,6 +32,22 @@ module GraphqlRails
       @pagination_options
     end
 
+    def classically_paginated(classic_pagination_options = {})
+      classic_pagination_options = {} if classic_pagination_options == true
+      classic_pagination_options = nil if classic_pagination_options == false
+
+      @classic_pagination_options = classic_pagination_options
+      permit(filter: :string, column: :string, direction: :int, page: :int)
+    end
+
+    def classically_paginated?
+      !classic_pagination_options.nil?
+    end
+
+    def classic_pagination_options
+      @classic_pagination_options
+    end
+
     def input_attribute_options
       @input_attribute_options || {}
     end

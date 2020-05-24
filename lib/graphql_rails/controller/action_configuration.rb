@@ -52,6 +52,11 @@ module GraphqlRails
         super
       end
 
+      def classically_paginated(*args)
+        @return_type = nil
+        super
+      end
+
       def description(new_description = nil)
         if new_description
           @description = new_description
@@ -97,7 +102,10 @@ module GraphqlRails
       end
 
       def type_parser
-        @type_parser ||= Attributes::TypeParser.new(custom_return_type, paginated: paginated?)
+        @type_parser ||= Attributes::TypeParser.new(
+                            custom_return_type,
+                            paginated: paginated?,
+                            classically_paginated: classically_paginated?)
       end
 
       private
@@ -107,7 +115,9 @@ module GraphqlRails
       def build_return_type
         return raise_deprecation_error if custom_return_type.nil?
 
-        if paginated?
+        if classically_paginated?
+          type_parser.graphql_model ? type_parser.graphql_model.graphql.pagination_type : nil
+        elsif paginated?
           type_parser.graphql_model ? type_parser.graphql_model.graphql.connection_type : nil
         else
           type_parser.graphql_type

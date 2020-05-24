@@ -17,13 +17,18 @@ module GraphqlRails
 
       delegate :list?, :required_inner_type?, :required_list?, :required?, to: :type_name_info
 
-      def initialize(unparsed_type, paginated: false)
+      def initialize(unparsed_type, paginated: false, classically_paginated: false)
         @unparsed_type = unparsed_type
         @paginated = paginated
+        @classically_paginated = classically_paginated
       end
 
       def paginated?
         @paginated
+      end
+
+      def classically_paginated?
+        @classically_paginated
       end
 
       def graphql_type
@@ -37,7 +42,9 @@ module GraphqlRails
       end
 
       def type_arg
-        if paginated?
+        if classically_paginated?
+          classically_paginated_type_arg
+        elsif paginated?
           paginated_type_arg
         elsif list?
           list_type_arg
@@ -50,6 +57,12 @@ module GraphqlRails
 
       def paginated_type_arg
         return graphql_model.graphql.connection_type if graphql_model
+
+        raise NotSupportedFeature, 'pagination is only supported for models which include GraphqlRails::Model'
+      end
+
+      def classically_paginated_type_arg
+        return graphql_model.graphql.pagination_type if graphql_model
 
         raise NotSupportedFeature, 'pagination is only supported for models which include GraphqlRails::Model'
       end

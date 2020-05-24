@@ -24,6 +24,16 @@ module GraphqlRails
           controller(action.controller)
           controller_action_name(action.name)
 
+          if (action.return_type.respond_to? 'name') && (action.return_type.name == 'Paginatable')
+            def self.name
+              'Paginatable'
+            end
+          else
+            def self.name
+              'default'
+            end
+          end
+
           action.arguments.each do |attribute|
             argument(*attribute.input_argument_args)
           end

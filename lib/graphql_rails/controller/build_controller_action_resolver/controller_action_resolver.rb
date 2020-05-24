@@ -20,7 +20,14 @@ module GraphqlRails
 
         def resolve(**inputs)
           request = Request.new(object, inputs, context)
-          self.class.controller.new(request).call(self.class.controller_action_name)
+
+          result = self.class.controller.new(request).call(self.class.controller_action_name)
+
+          if self.class.name == 'Paginatable'
+            return result.paginate(page: inputs[:page])
+          end
+
+          result
         end
       end
     end

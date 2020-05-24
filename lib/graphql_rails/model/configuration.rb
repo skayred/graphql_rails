@@ -6,6 +6,7 @@ require 'graphql_rails/model/build_enum_type'
 require 'graphql_rails/model/input'
 require 'graphql_rails/model/configurable'
 require 'graphql_rails/model/build_connection_type'
+require 'graphql_rails/model/build_pagination_type'
 
 module GraphqlRails
   module Model
@@ -20,6 +21,7 @@ module GraphqlRails
       def initialize_copy(other)
         super
         @connection_type = nil
+        @pagination_type = nil
         @graphql_type = nil
         @input = other.instance_variable_get(:@input)&.transform_values(&:dup)
         @attributes = other.instance_variable_get(:@attributes)&.transform_values(&:dup)
@@ -61,6 +63,10 @@ module GraphqlRails
 
       def connection_type
         @connection_type ||= BuildConnectionType.call(graphql_type)
+      end
+
+      def pagination_type
+        @pagination_type ||= BuildPaginationType.call(graphql_type)
       end
 
       private

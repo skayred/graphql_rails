@@ -31,6 +31,10 @@ module GraphqlRails
         false
       end
 
+      def classically_paginated?
+        false
+      end
+
       private
 
       attr_reader :initial_name, :initial_type, :options, :subtype
