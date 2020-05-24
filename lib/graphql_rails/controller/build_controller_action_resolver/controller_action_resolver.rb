@@ -29,7 +29,7 @@ module GraphqlRails
             if inputs[:direction] < 0
               direction = 'desc'
             end
-            return result.where("name LIKE ?", "%#{sanitize_sql_like(inputs[:filter])}%").order("#{column} #{direction}").paginate(page: inputs[:page])
+            return result.where("name LIKE ?", "%#{ActiveRecord::Base::sanitize_sql_like(inputs[:filter])}%").order("#{column} #{direction}").paginate(page: inputs[:page])
           end
 
           result
