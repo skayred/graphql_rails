@@ -18,11 +18,13 @@ module GraphqlRails
           if active_record?
             {
                 total_pages: (list.total_entries/list.per_page).ceil,
+                total_items: list.total_entries,
                 current_page: list.current_page
             }
           else
             {
                 total_pages: 1,
+                total_items: list.total_entries,
                 current_page: 1
             }
           end

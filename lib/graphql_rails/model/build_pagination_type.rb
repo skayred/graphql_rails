@@ -45,6 +45,7 @@ module GraphqlRails
           graphql_name("#{type.graphql_name}Cursor")
 
           field :total_pages, 'Int', null: false
+          field :total_items, 'Int', null: false
           field :current_page, 'Int', null: false
         end
       end
